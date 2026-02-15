@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  order_service:
+    build: ./order_service
+    ports:
+      - 8001:8000
+    environment:
+      - INVENTORY_URL=http://inventory_service:8000
+      - NOTIFICATION_URL=http://notification_service:8000
+      - INVENTORY_TIMEOUT_MS=1000
+
+  inventory_service:
+    build: ./inventory_service
+    ports:
+      - 8002:8000
+    environment:
+      - INVENTORY_DELAY_MS=0
+      - INVENTORY_FAIL=false
+
+  notification_service:
+    build: ./notification_service
+    ports:
+      - 8003:8000
+
+networks:
+  default:
+    driver: bridge
