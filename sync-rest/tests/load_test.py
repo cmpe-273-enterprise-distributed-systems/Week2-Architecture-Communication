@@ -6,7 +6,11 @@ URL = "http://localhost:8001/order"
 
 
 async def send_order(client, i):
-    payload = {"order_id": f"order-{i}", "items": ["burger", "fries"]}
+    # Request body matches common.models.OrderCreateRequest (user_id, items)
+    payload = {
+        "user_id": "load-test",
+        "items": [{"sku": "burger", "qty": 1}, {"sku": "fries", "qty": 1}],
+    }
     start = time.perf_counter()
     try:
         r = await client.post(URL, json=payload, timeout=10.0)

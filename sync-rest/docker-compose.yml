@@ -1,26 +1,41 @@
-version: '3.8'
 services:
   order_service:
-    build: ./order_service
+    build:
+      context: ..
+      dockerfile: sync-rest/order_service/Dockerfile
     ports:
       - 8001:8000
     environment:
       - INVENTORY_URL=http://inventory_service:8000
       - NOTIFICATION_URL=http://notification_service:8000
       - INVENTORY_TIMEOUT_MS=1000
+      - DB_PATH=/data/orders.db
+    volumes:
+      - order_data:/data
 
   inventory_service:
-    build: ./inventory_service
+    build:
+      context: ..
+      dockerfile: sync-rest/inventory_service/Dockerfile
     ports:
       - 8002:8000
     environment:
       - INVENTORY_DELAY_MS=0
       - INVENTORY_FAIL=false
+      - DB_PATH=/data/inventory.db
+    volumes:
+      - inventory_data:/data
 
   notification_service:
-    build: ./notification_service
+    build:
+      context: ..
+      dockerfile: sync-rest/notification_service/Dockerfile
     ports:
       - 8003:8000
+
+volumes:
+  order_data: {}
+  inventory_data: {}
 
 networks:
   default:
