@@ -50,6 +50,15 @@ inventory_service:
         - INVENTORY_FAIL=true
 ```
 
+## Idempotency
+
+InventoryService avoids double-reserving when the same OrderPlaced is delivered more than once:
+
+1. **Event-level:** Before processing, it records the message’s `event_id` in `processed_messages`. If that `event_id` is already present, the message is skipped (no reservation, no publish).
+2. **Order-level:** Reservations are stored by `order_id` via `try_create_reservation`. If a reservation for that order already exists, the insert is a no-op and the existing result is used.
+
+Together, re-deliveries of the same event are ignored, and at most one reservation is created per order.
+
 ## Tests
 
 Run from repo root with services up.
