@@ -37,7 +37,7 @@ async def process_order_placed(body: bytes) -> OrderPlacedEvent | None:
         data = json.loads(body)
         return OrderPlacedEvent.model_validate(data)
     except (json.JSONDecodeError, Exception) as e:
-        logger.warning("Malformed OrderPlaced message: %s", e)
+        logger.warning("Malformed OrderPlaced message (rejecting to DLQ): %s", type(e).__name__)
         return None
 
 

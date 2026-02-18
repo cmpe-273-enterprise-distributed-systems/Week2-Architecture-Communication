@@ -1,21 +1,21 @@
 # async-rabbitmq
 
-Campus food ordering service using RabbitMQ async messaging. Python 3.11, aio-pika, common (shared models/storage).
+Campus food ordering service using RabbitMQ async messaging. Python 3.14, aio-pika, common (shared models/storage).
 
 ## Structure
 
-| Path | Purpose |
-|------|---------|
-| `broker/` | Queue config, setup (exchanges, queues, DLQ) |
-| `order_service/` | HTTP API; saves order, publishes OrderPlaced |
-| `inventory_service/` | Consumes OrderPlaced, reserves (idempotent), publishes InventoryReserved/Failed |
-| `notification_service/` | Consumes InventoryReserved, sends confirmation |
-| `tests/` | Backlog drain, idempotency, poison/DLQ tests |
+| Path                    | Purpose                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `broker/`               | Queue config, setup (exchanges, queues, DLQ)                                    |
+| `order_service/`        | HTTP API; saves order, publishes OrderPlaced                                    |
+| `inventory_service/`    | Consumes OrderPlaced, reserves (idempotent), publishes InventoryReserved/Failed |
+| `notification_service/` | Consumes InventoryReserved, sends confirmation                                  |
+| `tests/`                | Backlog drain, idempotency, poison/DLQ tests                                    |
 
 ## Build
 
 ```bash
-cd /path/to/week2-group
+cd /path/to/repo
 docker compose -f async-rabbitmq/docker-compose.yml build
 ```
 
@@ -46,21 +46,20 @@ Or in `docker-compose.yml`:
 
 ```yaml
 inventory_service:
-  environment:
-    - INVENTORY_FAIL=true
+    environment:
+        - INVENTORY_FAIL=true
 ```
 
 ## Tests
 
-Run from repo root (`week2-group`) with services up.
+Run from repo root with services up.
 
 ```bash
-cd /path/to/week2-group
+cd /path/to/repo
 export PYTHONPATH=.:async-rabbitmq
 
-# Backlog drain: stop inventory 60s, publish orders, restart, observe drain
-python -m async_rabbitmq.tests.test_backlog_drain
-# or: python async-rabbitmq/tests/test_backlog_drain.py
+# Backlog drain: stop inventory 60s, publish orders, restart; shows queue depth draining
+python async-rabbitmq/tests/test_backlog_drain.py
 
 # Idempotency: same OrderPlaced twice -> single reservation
 python async-rabbitmq/tests/test_idempotency.py
