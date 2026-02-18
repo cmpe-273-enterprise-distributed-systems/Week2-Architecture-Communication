@@ -1,0 +1,54 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  order_service:
+    build:
+      context: ..
+      dockerfile: async-rabbitmq/order_service/Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - RABBIT_URL=amqp://guest:guest@rabbitmq:5672/
+      - DB_PATH=/data/orders.db
+    volumes:
+      - order_data:/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  inventory_service:
+    build:
+      context: ..
+      dockerfile: async-rabbitmq/inventory_service/Dockerfile
+    environment:
+      - RABBIT_URL=amqp://guest:guest@rabbitmq:5672/
+      - DB_PATH=/data/inventory.db
+      - INVENTORY_FAIL=false
+    volumes:
+      - inventory_data:/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  notification_service:
+    build:
+      context: ..
+      dockerfile: async-rabbitmq/notification_service/Dockerfile
+    environment:
+      - RABBIT_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+  order_data: {}
+  inventory_data: {}
