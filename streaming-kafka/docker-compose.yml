@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"       # host access
+      - "29092:29092"     # internal docker network access
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092"
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+  init-topics:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on:
+      - kafka
+    entrypoint: ["/bin/bash", "-lc"]
+    command: >
+      "
+      echo 'Waiting for Kafka...';
+      cub kafka-ready -b kafka:29092 1 30;
+
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic order-events --partitions 6 --replication-factor 1;
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic inventory-events --partitions 6 --replication-factor 1;
+
+      echo 'Topics created.';
+      "
+    restart: "no"
+
+  producer_order:
+    build: ./producer_order
+    depends_on:
+      - init-topics
+    environment:
+      KAFKA_BOOTSTRAP: "kafka:29092"
+      ORDER_TOPIC: "order-events"
+      PRODUCER_CLIENT_ID: "producer_order"
+    profiles: ["manual"]   # don't auto-run
+
+  inventory_consumer:
+    build: ./inventory_consumer
+    depends_on:
+      - init-topics
+    environment:
+      KAFKA_BOOTSTRAP: "kafka:29092"
+      ORDER_TOPIC: "order-events"
+      INVENTORY_TOPIC: "inventory-events"
+      CONSUMER_GROUP: "inventory-consumer-group"
+      INVENTORY_SLEEP_MS: "0"      # set >0 to throttle and create lag
+      FAIL_RATE: "0.02"            # 2% failures by default
+    restart: unless-stopped
+
+  analytics_consumer:
+    build: ./analytics_consumer
+    depends_on:
+      - init-topics
+    environment:
+      KAFKA_BOOTSTRAP: "kafka:29092"
+      ORDER_TOPIC: "order-events"
+      INVENTORY_TOPIC: "inventory-events"
+      ANALYTICS_GROUP: "analytics-consumer-group"
+      METRICS_PATH: "/data/metrics.json"
+      FLUSH_EVERY_SECONDS: "3"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./analytics_consumer/data:/data
+    restart: unless-stopped
