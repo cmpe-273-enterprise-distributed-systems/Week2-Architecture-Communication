@@ -32,6 +32,8 @@ p50=235.32ms p95=325.48ms
 
 ### Test 2: Inject 2 Second Delay into Inventory
 
+Default `INVENTORY_TIMEOUT_MS=5000` (in docker-compose) is above the 2s delay so requests succeed and you can measure latency impact.
+
 ```bash
 # Terminal 2: Edit docker-compose.yml
 # Change INVENTORY_DELAY_MS=0 → INVENTORY_DELAY_MS=2000
@@ -43,11 +45,13 @@ sleep 3
 python3 tests/load_test.py 200 20
 ```
 
-**Expected output:**
+**Expected output (successful requests; latency reflects 2s delay):**
 ```
-requests: 200, success: 0
-p50=1206.12ms p95=1349.54ms
+requests: 200, success: 200
+p50=~2100ms p95=~2200ms
 ```
+
+**To demonstrate timeout (504):** Set `INVENTORY_TIMEOUT_MS=1000` on order_service and restart it, then run the same delay test; all requests will timeout and return 504.
 
 ---
 
@@ -78,7 +82,7 @@ p50=105.73ms p95=187.84ms
 # Terminal 3: Send single order to see error detail
 curl -X POST http://localhost:8001/order \
   -H 'Content-Type: application/json' \
-  -d '{"order_id":"test-123","items":["burger"]}' -i
+  -d '{"user_id":"test-123","items":[{"sku":"burger","qty":1}]}' -i
 ```
 
 **Expected output (with delay):**
@@ -95,7 +99,7 @@ content-type: application/json
 
 #### **Sync Path (Part A)**
 ```
-1. User: POST /order {order_id: "123", items: ["burger"]}
+1. User: POST /order {user_id: "123", items: [{sku: "burger", qty: 1}]}
 2. OrderService waits (blocks) →
 3. OrderService calls InventoryService:/reserve (still waiting)
 4. InventoryService sleeps 0.1s → responds {status: "reserved"}
@@ -136,7 +140,7 @@ Time  0ms: OrderService receives request
 | Scenario | Requests | Success | p50 Latency | p95 Latency | Issue |
 |----------|----------|---------|-------------|-------------|-------|
 | **Baseline** | 200 | 200 (100%) | 235.32 ms | 325.48 ms | None |
-| **2s Inventory Delay** | 200 | 0 (0%) | 1206.12 ms | 1349.54 ms | Timeout (1s limit exceeded) |
+| **2s Inventory Delay** | 200 | 200 (100%) | ~2100 ms | ~2200 ms | Latency impact (timeout > 2s) |
 | **Inventory Fail (500)** | 100 | 0 (0%) | 105.73 ms | 187.84 ms | OrderService returns 502 |
 
 ### Analysis & Reasoning
@@ -147,10 +151,8 @@ Time  0ms: OrderService receives request
 - p50 (~235ms) is mainly the two sequential calls
 
 **With 2s Inventory Delay**
-- Inventory adds a 2000ms delay, but OrderService timeout is 1000ms (`INVENTORY_TIMEOUT_MS=1000`)
-- OrderService times out after ~1s and returns `504 Gateway Timeout`
-- p50 rises to ~1206ms because requests wait near the full timeout before failing
-- Requests fail because the sync chain can’t finish within the timeout
+- With `INVENTORY_TIMEOUT_MS=5000` (default), requests succeed; p50 reflects the 2s delay (~2100ms+).
+- To demonstrate timeout: set `INVENTORY_TIMEOUT_MS=1000` on order_service; with 2s delay, OrderService returns `504 Gateway Timeout`.
 
 **With Inventory Failure (500)**
 - Inventory immediately returns HTTP 500 (`INVENTORY_FAIL=true`)

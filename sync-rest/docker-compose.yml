@@ -8,7 +8,8 @@ services:
     environment:
       - INVENTORY_URL=http://inventory_service:8000
       - NOTIFICATION_URL=http://notification_service:8000
-      - INVENTORY_TIMEOUT_MS=1000
+      # Set > 2000 so delay test (INVENTORY_DELAY_MS=2000) yields successful requests for latency measurement
+      - INVENTORY_TIMEOUT_MS=5000
       - DB_PATH=/data/orders.db
     volumes:
       - order_data:/data

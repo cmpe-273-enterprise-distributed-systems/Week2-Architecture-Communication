@@ -36,14 +36,6 @@ print(f"[inventory] Throttle SLEEP_MS={SLEEP_MS}, FAIL_RATE={FAIL_RATE}")
 processed = 0
 failed = 0
 
-for msg in consumer:
-    print(f"[inventory] Consuming {ORDER_TOPIC} as group '{GROUP_ID}'")
-print(f"[inventory] Throttle SLEEP_MS={SLEEP_MS}, FAIL_RATE={FAIL_RATE}")
-print("[inventory] entering poll loop (should run forever)")
-
-processed = 0
-failed = 0
-
 while True:
     records = consumer.poll(timeout_ms=1000, max_records=500)
     if not records:

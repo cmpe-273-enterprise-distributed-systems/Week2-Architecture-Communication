@@ -59,6 +59,16 @@ InventoryService avoids double-reserving when the same OrderPlaced is delivered 
 
 Together, re-deliveries of the same event are ignored, and at most one reservation is created per order.
 
+## Demonstrating assignment requirements
+
+**Stop inventory for ~60 seconds:** From repo root, run `python async-rabbitmq/tests/test_backlog_drain.py` (it stops `inventory_service`, publishes orders, then restarts inventory). Or manually: `docker compose -f async-rabbitmq/docker-compose.yml stop inventory_service`, wait 60s while posting orders to http://localhost:8001/order, then `start inventory_service`.
+
+**Observe queue backlog in RabbitMQ UI:** Open http://localhost:15672 (guest/guest), go to **Queues**, select queue **order-placed**; the "Ready" column shows backlog. After restarting inventory, watch the count drain to 0.
+
+**Demonstrate idempotency:** Run `python async-rabbitmq/tests/test_idempotency.py` with services up. It publishes the same OrderPlaced event twice; the test asserts only one new reservation is created (event_id and order_id guards in InventoryService).
+
+**Demonstrate DLQ / poison message:** Run `python async-rabbitmq/tests/test_poison_dlq.py`. It publishes a malformed message to the OrderPlaced routing key; InventoryService rejects it (no requeue), and the message is dead-lettered to **order-placed.dlq**. In RabbitMQ UI, Queues → **order-placed.dlq** to see the message.
+
 ## Tests
 
 Run from repo root with services up.
