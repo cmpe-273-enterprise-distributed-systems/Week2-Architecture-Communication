@@ -52,8 +52,6 @@ Explaination - Replay produced consistent metrics. The only difference between m
 ## Metrics output
 
 * `analytics_consumer/data/metrics.json`
-* `analytics_consumer/data/metrics_before.json`
-* `analytics_consumer/data/metrics_after.json`
 
 ## Evidence files included
 
