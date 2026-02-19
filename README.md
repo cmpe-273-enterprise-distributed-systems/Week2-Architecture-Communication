@@ -234,8 +234,35 @@ python async-rabbitmq/tests/test_poison_dlq.py
 **What to submit:** Screenshots or logs showing backlog (e.g. RabbitMQ Queues → order-placed "Ready" count), then recovery (count draining to 0).
 
 **Screenshot / Log Evidence:**  
-<INSERT SCREENSHOT OR LOG OUTPUT>
+```bash
+(.venv) conlynpattison@Conlyns-MacBook-Pro week2-group % PYTHONPATH=.:async-rabbitmq python async-rabbitmq/tests/test_backlog_drain.py
 
+1. Stop InventoryService
+[+] Running 1/0
+ ⠿ Container async-rabbitmq-inventory_service-1  Stopped                                                                            0.0s
+2. Publish 30 orders (InventoryService is down)
+   order 1: 500
+   order 2: 500
+   order 3: 200
+   ...
+   order 28: 200
+   order 29: 200
+   order 30: 200
+   order-placed queue backlog: 26 messages
+3. Restart InventoryService (backlog will drain)
+[+] Running 2/2
+ ⠿ Container async-rabbitmq-rabbitmq-1           Healthy                                                                           0.5s
+ ⠿ Container async-rabbitmq-inventory_service-1  Started                                                                           0.4s
+4. Backlog drain (polling order-placed queue depth):
+   [████████████████████████████░░] 28 messages
+   [████████████████████████████░░] 28 messages
+   [████████████████████████████░░] 28 messages
+   [████████████████████████████░░] 28 messages
+   [████████████████████████████░░] 28 messages
+   [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0 messages
+   Drain complete.
+Done. Check inventory DB for 30 reservations and notification logs for 30 confirms.
+```
 ### 3.4 Idempotency Strategy
 
 - **order_id as idempotency key:** Each order has a unique order_id. Reservations are keyed by order_id so that duplicate processing of the same order does not create multiple reservations.
@@ -250,6 +277,23 @@ python async-rabbitmq/tests/test_poison_dlq.py
 - **DLQ capture:** The order-placed queue is configured with a dead-letter exchange/queue (e.g., **order-placed.dlq**). Rejected (or repeatedly failed) messages are routed to the DLQ so they can be inspected and handled separately without blocking the main queue.
 
 **What to submit:** Show DLQ or poison message handling — e.g. run `test_poison_dlq.py` and show the message in RabbitMQ UI (Queues → order-placed.dlq).
+
+**Screenshot / Log Evidence:**  
+
+```bash
+(.venv) conlynpattison@Conlyns-MacBook-Pro week2-group % PYTHONPATH=.:async-rabbitmq python async-rabbitmq/tests/test_poison_dlq.py
+
+1. Publish malformed OrderPlaced (poison message)
+Published poison message to OrderPlaced
+2. Wait for rejection and DLQ routing (poll up to 20s)
+3. Verify DLQ incremented by 1
+   DLQ before: 0, after: 1, added: 1
+PASS: Poison message routed to DLQ
+```
+
+**Message on RabbitMQ:**
+
+<img width="546" height="474" alt="image" src="https://github.com/user-attachments/assets/453be17c-a8b9-4b46-af80-821b65339392" />
 
 ### 3.6 Observations
 
