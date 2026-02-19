@@ -1,0 +1,13 @@
+Producing 10,000 OrderPlaced events...
+Published 1000/10000
+Published 2000/10000
+Published 3000/10000
+Published 4000/10000
+Published 5000/10000
+Published 6000/10000
+Published 7000/10000
+Published 8000/10000
+Published 9000/10000
+Published 10000/10000
+Done. Published 10000 OrderPlaced events in 0.45s
+Done producing.

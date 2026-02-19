@@ -10,15 +10,7 @@ INVENTORY_TOPIC = os.getenv("INVENTORY_TOPIC", "inventory-events")
 GROUP_ID = os.getenv("CONSUMER_GROUP", "inventory-consumer-group")
 
 SLEEP_MS = int(os.getenv("INVENTORY_SLEEP_MS", "0"))
-FAIL_RATE = float(os.getenv("FAIL_RATE", "0.02"))  # 2% default
-
-producer = KafkaProducer(
-    bootstrap_servers=KAFKA_BOOTSTRAP,
-    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-    key_serializer=lambda k: k.encode("utf-8"),   
-    acks="all",
-    retries=5
-)
+FAIL_RATE = float(os.getenv("FAIL_RATE", "0.02"))
 
 consumer = KafkaConsumer(
     ORDER_TOPIC,
@@ -30,7 +22,15 @@ consumer = KafkaConsumer(
     key_deserializer=lambda b: b.decode("utf-8") if b else None,
 )
 
-print(f"[inventory] Consuming {ORDER_TOPIC} as group '{GROUP_ID}'")
+producer = KafkaProducer(
+    bootstrap_servers=KAFKA_BOOTSTRAP,
+    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+    key_serializer=lambda k: str(k).encode("utf-8"),
+    acks="all",
+    retries=5,
+)
+
+print(f"[inventory] STARTED. Group='{GROUP_ID}' consuming '{ORDER_TOPIC}' -> producing '{INVENTORY_TOPIC}'")
 print(f"[inventory] Throttle SLEEP_MS={SLEEP_MS}, FAIL_RATE={FAIL_RATE}")
 
 processed = 0
@@ -42,9 +42,10 @@ while True:
         continue
 
     for _, msgs in records.items():
-        for msg in msgs:
-            order_id = msg.key or msg.value.get("orderId", "unknown")
-            ev = msg.value
+        for m in msgs:
+            ev = m.value
+            order_id = m.key or ev.get("orderId") or "unknown"
+            order_id = str(order_id)
 
             if SLEEP_MS > 0:
                 time.sleep(SLEEP_MS / 1000.0)
@@ -53,18 +54,14 @@ while True:
             out = {
                 "eventType": "InventoryReserved" if ok else "InventoryFailed",
                 "orderId": order_id,
-                "timestampMs": ev.get("timestampMs", int(time.time() * 1000)),
+                "timestampMs": int(ev.get("timestampMs", int(time.time() * 1000))),
                 "reason": None if ok else "OUT_OF_STOCK",
             }
 
-            producer.send(INVENTORY_TOPIC, key=order_id, value=out)
-            producer.flush()  
-            print(f"[inventory] emitted {out['eventType']} -> {INVENTORY_TOPIC} for {order_id}")
-
+            future = producer.send(INVENTORY_TOPIC, key=order_id, value=out)
+            md = future.get(timeout=10)  # forces error visibility + confirms publish
             processed += 1
             failed += 0 if ok else 1
 
-            if processed % 1000 == 0:
-                print(f"[inventory] processed={processed}, failed={failed}")
-
-
+            if processed % 50 == 0:
+                print(f"[inventory] produced ok. processed={processed}, failed={failed} (latest offset={md.offset})")

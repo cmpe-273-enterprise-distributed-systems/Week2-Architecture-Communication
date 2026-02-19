@@ -1,0 +1,53 @@
+Setting inventory throttle INVENTORY_SLEEP_MS=50 and restarting inventory_consumer...
+Going to remove streaming-kafka-inventory_consumer-1
+#1 [internal] load local bake definitions
+#1 reading from stdin 710B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 191B done
+#2 DONE 0.0s
+
+#3 [auth] library/python:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#4 [internal] load metadata for docker.io/library/python:3.11-slim
+#4 DONE 0.8s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 63B done
+#6 DONE 0.0s
+
+#7 [1/5] FROM docker.io/library/python:3.11-slim@sha256:0b23cfb7425d065008b778022a17b1551c82f8b4866ee5a7a200084b7e2eafbf
+#7 resolve docker.io/library/python:3.11-slim@sha256:0b23cfb7425d065008b778022a17b1551c82f8b4866ee5a7a200084b7e2eafbf 0.0s done
+#7 DONE 0.0s
+
+#8 [2/5] WORKDIR /app
+#8 CACHED
+
+#9 [3/5] COPY requirements.txt .
+#9 CACHED
+
+#10 [4/5] RUN pip install --no-cache-dir -r requirements.txt
+#10 CACHED
+
+#11 [5/5] COPY app.py .
+#11 CACHED
+
+#12 exporting to image
+#12 exporting layers done
+#12 exporting manifest sha256:bf7affb13c5769dda64df400b515dd6686eaf3bfc01af4cdca73b2135702d994 done
+#12 exporting config sha256:e7de3be46cb558cbefcf2bd6a7bf8167e2cc5f4ac5f19ba8ce063a1fddbab149 done
+#12 exporting attestation manifest sha256:e202a8dcac34fc1049605da322d4fa71eabe5e2b99b3bdad8941fcaddf0f24c5 done
+#12 exporting manifest list sha256:05fc83667358244bf348a015af325140e2d090d0982371c04150a40984292745 done
+#12 naming to docker.io/library/streaming-kafka-inventory_consumer:latest done
+#12 unpacking to docker.io/library/streaming-kafka-inventory_consumer:latest done
+#12 DONE 0.1s
+
+#13 resolving provenance for metadata file
+#13 DONE 0.0s
+Inventory throttled.

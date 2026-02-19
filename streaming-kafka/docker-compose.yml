@@ -66,6 +66,7 @@ services:
       CONSUMER_GROUP: "inventory-consumer-group"
       INVENTORY_SLEEP_MS: "0"      # set >0 to throttle and create lag
       FAIL_RATE: "0.02"            # 2% failures by default
+      PYTHONUNBUFFERED: "1"
     restart: unless-stopped
 
   analytics_consumer:

@@ -1,0 +1,9 @@
+--- analytics_consumer/data/metrics_before.json	2026-02-18 17:21:15
++++ analytics_consumer/data/metrics_after.json	2026-02-18 17:21:49
+@@ -1,5 +1,5 @@
+ {
+-  "generatedAtUnix": 1771464074,
++  "generatedAtUnix": 1771464107,
+   "totalOrdersSeen": 60000,
+   "totalInventoryEvents": 60019,
+   "inventoryFailed": 1232,

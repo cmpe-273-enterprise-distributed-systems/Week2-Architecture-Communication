@@ -1,8 +1,18 @@
 {
-  "generatedAtUnix": 1771448539,
-  "totalOrdersSeen": 0,
-  "totalInventoryEvents": 0,
-  "inventoryFailed": 0,
-  "failureRate": 0.0,
-  "ordersPerMinuteBucket": {}
+  "generatedAtUnix": 1771464107,
+  "totalOrdersSeen": 60000,
+  "totalInventoryEvents": 60019,
+  "inventoryFailed": 1232,
+  "failureRate": 0.020526833169496324,
+  "ordersPerMinuteBucket": {
+    "29524383": 10000,
+    "29524384": 1903,
+    "29524385": 17696,
+    "29524386": 401,
+    "29524390": 10000,
+    "29524392": 6321,
+    "29524393": 3679,
+    "29524396": 4675,
+    "29524397": 5325
+  }
 }

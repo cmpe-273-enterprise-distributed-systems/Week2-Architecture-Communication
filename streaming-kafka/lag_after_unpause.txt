@@ -1,0 +1,25 @@
+=== Consumer Group Lag: inventory-consumer-group ===
+
+GROUP                    TOPIC           PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                             HOST            CLIENT-ID
+inventory-consumer-group order-events    0          6635            9937            3302            kafka-python-2.0.2-d540231b-0c75-4e8b-b410-50c66df76eaf /172.18.0.6     kafka-python-2.0.2
+inventory-consumer-group order-events    2          6662            10123           3461            kafka-python-2.0.2-d540231b-0c75-4e8b-b410-50c66df76eaf /172.18.0.6     kafka-python-2.0.2
+inventory-consumer-group order-events    3          6619            10003           3384            kafka-python-2.0.2-d540231b-0c75-4e8b-b410-50c66df76eaf /172.18.0.6     kafka-python-2.0.2
+inventory-consumer-group order-events    4          6671            9986            3315            kafka-python-2.0.2-d540231b-0c75-4e8b-b410-50c66df76eaf /172.18.0.6     kafka-python-2.0.2
+inventory-consumer-group order-events    5          6651            9863            3212            kafka-python-2.0.2-d540231b-0c75-4e8b-b410-50c66df76eaf /172.18.0.6     kafka-python-2.0.2
+inventory-consumer-group order-events    1          6762            10088           3326            kafka-python-2.0.2-d540231b-0c75-4e8b-b410-50c66df76eaf /172.18.0.6     kafka-python-2.0.2
+
+=== Consumer Group Lag: analytics-consumer-group ===
+
+GROUP                    TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                             HOST            CLIENT-ID
+analytics-consumer-group order-events     0          9937            9937            0               kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group order-events     2          10123           10123           0               kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group order-events     3          10003           10003           0               kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group inventory-events 0          6635            9937            3302            kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group order-events     4          9986            9986            0               kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group inventory-events 2          9747            10123           376             kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group order-events     5          9863            9863            0               kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group inventory-events 1          6762            6762            0               kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group inventory-events 4          7171            7171            0               kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group inventory-events 5          6651            7629            978             kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group inventory-events 3          6619            10003           3384            kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
+analytics-consumer-group order-events     1          10088           10088           0               kafka-python-2.0.2-7fbea22c-9caa-41d4-88b1-1718bce6eaeb /172.18.0.5     kafka-python-2.0.2
